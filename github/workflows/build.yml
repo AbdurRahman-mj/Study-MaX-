@@ -1,0 +1,51 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+    
+    - name: Install Cordova
+      run: npm install -g cordova
+    
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+    
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v2
+    
+    - name: Create Cordova project
+      run: |
+        cordova create StudyMaxApp com.studymax.app StudyMaster25
+        cd StudyMaxApp
+        cp ../config.xml .
+        mkdir -p www
+        cp ../Study\ app www/index.html
+    
+    - name: Add Android platform
+      run: |
+        cd StudyMaxApp
+        cordova platform add android
+    
+    - name: Build APK
+      run: |
+        cd StudyMaxApp
+        cordova build android --release
+    
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: StudyMaster25-APK
+        path: StudyMaxApp/platforms/android/app/build/outputs/apk/release/*.apk
